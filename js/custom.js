@@ -168,13 +168,13 @@ class Image3d extends FoldedContent {
 }
 
 document.addEventListener("DOMContentLoaded", (event) => {
+    const mediaQuery = window.matchMedia("(min-width: 1025px)");
+
     const text3d = new Text3d();
     const image3d = new Image3d();
 
     let lenis;
-
-    const mediaQuery = window.matchMedia("(min-width: 1025px)");
-    let rafCallback = null; // gsap ticker 콜백 참조 저장
+    let lenisRAF = null;
 
     function breakPoint(mediaQuery) {
         if (mediaQuery.matches) {
@@ -182,25 +182,18 @@ document.addEventListener("DOMContentLoaded", (event) => {
             if (!lenis) {
                 lenis = new Lenis();
 
-                // 콜백 함수를 변수에 저장
-                rafCallback = function (time) {
-                    lenis.raf(time * 1000);
+                lenisRAF = (time) => {
+                    lenis.raf(time);
+                    requestAnimationFrame(lenisRAF);
                 };
-
-                gsap.ticker.add(rafCallback);
-                gsap.ticker.lagSmoothing(0);
+                requestAnimationFrame(lenisRAF);
             }
         } else {
             // 모바일: lenis 제거
             if (lenis) {
-                // gsap ticker에서 콜백 제거
-                if (rafCallback) {
-                    gsap.ticker.remove(rafCallback);
-                    rafCallback = null;
-                }
-
                 lenis.destroy();
                 lenis = null;
+                lenisRAF = null; // RAF 참조 제거
             }
         }
     }
