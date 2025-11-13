@@ -1,21 +1,17 @@
 gsap.registerPlugin(ScrollTrigger);
 
-class Text3d {
-    constructor() {
-        this.section = document.querySelector("#text3d");
-        this.contentWrapper = document.querySelector(".content_wrapper");
-        this.contentOriginal = document.querySelector("#content");
-        this.contents = Array.from(document.querySelectorAll(".content"));
+class FoldedContent {
+    constructor(section, contentOriginalSelector, contentSelector) {
+        this.section = section;
+        this.contentOriginal = this.section.querySelector(contentOriginalSelector);
+        this.contents = Array.from(this.section.querySelectorAll(contentSelector));
 
         this.scrollers = [];
-        this.state = { disposed: false, scroll: 0, targetScroll: 0 };
-        this.contentCenter = this.contents[Math.floor(this.contents.length / 2)];
-
-        this.init();
+        this.state = {disposed: false, scroll: 0, targetScroll: 0};
     }
 
     setContent() {
-        for (let i = 0; i < this.contents.length; i ++) {
+        for (let i = 0; i < this.contents.length; i++) {
             const content = this.contents[i];
             const cloneContent = this.contentOriginal.cloneNode(true);
 
@@ -24,15 +20,36 @@ class Text3d {
             const sizeFixEle = document.createElement("div");
             sizeFixEle.classList.add("content-size-fix");
 
-            const item = document.createElement("div");
-            item.classList.add("item");
+            const scroller = document.createElement("div");
+            scroller.classList.add("content-scroller");
 
-            sizeFixEle.appendChild(item);
-            item.appendChild(cloneContent);
+            sizeFixEle.appendChild(scroller);
+            scroller.appendChild(cloneContent);
             content.appendChild(sizeFixEle);
 
-            this.scrollers[i] = item;
+            this.scrollers[i] = scroller;
         }
+    }
+
+    // Linear Interpolation
+    lerp(current, target, speed = 0.1, limit = 0.001) {
+        let change = (target - current) * speed;
+
+        if (Math.abs(change) < limit) {
+            change = target - current;
+        }
+
+        return change;
+    }
+}
+
+class Text3d extends FoldedContent {
+    constructor() {
+        const section = document.querySelector("#text3d");
+        super(section, "#content", ".content");
+
+        this.contentCenter = this.contents[Math.floor(this.contents.length / 2)];
+        this.init();
     }
 
     updateStyles(scroll) {
@@ -43,16 +60,6 @@ class Text3d {
 
     updateHeight() {
         this.section.style.height = this.scrollers[0].children[0].clientHeight - this.contentCenter.clientHeight + window.innerHeight + "px";
-    }
-
-    lerp(current, target, speed = 0.1, limit = 0.001) {
-        let change = (target - current) * speed;
-
-        if (Math.abs(change) < limit) {
-            change = target - current;
-        }
-
-        return change;
     }
 
     tick = () => {
@@ -81,6 +88,7 @@ class Text3d {
 
     init() {
         this.setContent();
+        this.setupResizeListener();
         this.tick();
     }
 
@@ -89,14 +97,75 @@ class Text3d {
     }
 }
 
-class Image3d {
+class Image3d extends FoldedContent {
     constructor() {
-        this.dom = document.querySelector("#image3d");
+        const section = document.querySelector("#image3d");
+        super(section, "#characters", ".content");
+
+        this.drag = document.querySelector("#drag");
+        this.contentMain = this.contents[this.contents.length - 1];
+        this.isDown = false;
+        this.lastClientX = null;
+
         this.init();
     }
 
+    updateStyles(scroll) {
+        this.scrollers.forEach((scroller) => {
+            scroller.children[0].style.transform = `translateX(${scroll}px)`;
+        });
+    }
+
+    tick = () => {
+        if (this.state.disposed) return;
+
+        this.state.targetScroll = Math.max(Math.min(0, this.state.targetScroll), -this.scrollers[0].children[0].clientWidth + this.contentMain.clientWidth);
+
+        this.state.scroll += this.lerp(
+            this.state.scroll,
+            this.state.targetScroll,
+            0.1,
+            0.0001
+        );
+
+        this.updateStyles(this.state.scroll);
+        requestAnimationFrame(this.tick);
+    }
+
+    setupDragListener() {
+        this.drag.addEventListener("mousedown", () => {
+            this.isDown = true;
+        });
+
+        this.drag.addEventListener("mouseup", () => {
+            this.isDown = false;
+            this.lastClientX = null;
+        });
+
+        this.drag.addEventListener("mouseout", (e) => {
+            const from = e.relatedTarget || e.toElement;
+
+            if (!from || from.nodeName === "HTML") {
+                this.isDown = false;
+            }
+        });
+
+        this.drag.addEventListener("mousemove", (e) => {
+            if (this.lastClientX && this.isDown) {
+                this.state.targetScroll += e.clientX - this.lastClientX;
+            }
+            this.lastClientX = e.clientX;
+        });
+    }
+
     init() {
-        // 여기에 이미지 관련 애니메이션 로직
+        this.setContent();
+        this.setupDragListener();
+        this.tick();
+    }
+
+    dispose() {
+        this.state.disposed = true;
     }
 }
 
