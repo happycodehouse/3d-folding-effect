@@ -21,4 +21,5 @@
 
 - **Lenis** (smooth scrolling library)
 - **JavaScript (ES6+)**
-- **SCSS/Sass** (CSS preprocessor with 3D transforms)
+
+- **SCSS** (CSS preprocessor with 3D transforms)
