@@ -2,8 +2,10 @@
 > Interactive 3D folding effect with smooth scrolling and draggable image gallery
 
 <p align="left">
-  <img src="./images/preview_01.png" width="45%">
-  <img src="./images/preview_02.png" width="45%">
+  <img src="./images/preview_01.png" width="600px">
+</p>
+<p align="left">
+    <img src="./images/preview_02.png" width="600px">
 </p>
 
 [🔗 Live Demo](https://3d-folding-effect.netlify.app/)
@@ -22,4 +24,5 @@
 - **Lenis** (smooth scrolling library)
 - **JavaScript (ES6+)**
 - **SCSS** (CSS preprocessor with 3D transforms)
+
 
