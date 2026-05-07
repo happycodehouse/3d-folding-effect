@@ -1,4 +1,4 @@
-# 🗺️ 3D Folding Effect
+# ✨ 3D Folding Effect
 > Interactive 3D folding effect with smooth scrolling and draggable image gallery
 
 <p align="left">
