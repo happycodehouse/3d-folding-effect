@@ -24,3 +24,7 @@
 - **Lenis** (smooth scrolling library)
 - **JavaScript (ES6+)**
 - **SCSS** (CSS preprocessor with 3D transforms)
+
+## Credits
+
+- Inspired by [3D Folding Technique](https://tympanus.net/codrops/2020/01/14/3d-folding-technique/) on Codrops.
